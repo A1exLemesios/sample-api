@@ -12,7 +12,13 @@ app.use("/", express.static(path.resolve(__dirname, "../ui/")));
 
 
 app.get("/questions", (req, res) => {
-  const questions = ["Question 1", "Question 2", "Question 3", "Question 4"]
+  const questions = {
+    "questionOne" : {
+      "question" :"Which character died on episode 7? ",
+      "possAns" : ["Ned Stark", "John Snow", "Cersei Lannister"]
+    }
+  }
+  console.log(questions);
   res.json(questions);
 });
 

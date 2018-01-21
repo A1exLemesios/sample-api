@@ -10,13 +10,15 @@
       }
       p    {
 
-        color: red;
+        font-size: 20px;
+      }
+      .hidden {
+        display:none;
       }
       #absolute-div1 , #absolute-div2 , #absolute-div3  {
         width: 300px;
         height: 100px;
         position: absolute;
-        background: lightblue;
         margin:15px;
       }
       #absolute-div2  {
@@ -40,7 +42,8 @@
         background: lightgray;
       }
 
-      input[type=button] {
+      #ClickMeButton {
+        padding:5px;
         color:#08233e;
         font:2.4em Futura, ‘Century Gothic’, AppleGothic, sans-serif;
         font-size:70%;
@@ -50,20 +53,26 @@
         margin: 5px;
         position:absolute;
       }
+
+      #ClickMeButton:hover {
+        background-color: green;
+      }
 </style>
   <head/>
   <body>
 
     <div id="relative-div">
-        <div id="absolute-div1">
-          <div class = "center" style=" background:blue; font-style:italic">
-            <p> I am a paragraph</p>
+        <div id="absolute-div1" class="hidden">
+          <div>
+            <p>Geia thou mwraki mou ..... :P</p>
           </div>
        </div>
        <div id="absolute-div2">
          <input type="button"  id="ClickMeButton" value="Click Me">
       </div>
-      <div id="absolute-div3">absolute-div3 </div>
+      <div id="absolute-div3"  class="hidden">
+        <input type="button"  id="getQuestions" value="Get questions">
+      </div>
     </div>
 
 
@@ -73,6 +82,14 @@
         $("#ClickMeButton").click(() => {
           $("#absolute-div1, #absolute-div3").fadeToggle(1000);
         })
+          // @TODO
+          // Find best practises for rendering response in html using jquery
+
+        $("#getQuestions").click(() => {
+          $.get("http://localhost:8080/questions", (data, status) => {
+            alert("Data: " + data.questionOne.question + "\nStatus: " + status);
+          });
+        });
       });
 
     </script>
