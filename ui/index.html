@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> My questions </title>
+    <style>
+      body {
+      }
+      h1   {color: blue;
+
+      }
+      p    {
+
+        color: red;
+      }
+      #absolute-div1 , #absolute-div2 , #absolute-div3  {
+        width: 300px;
+        height: 100px;
+        position: absolute;
+        background: lightblue;
+        margin:15px;
+      }
+      #absolute-div2  {
+        bottom: 0;
+        right: 0;
+        margin: 30px;
+        padding: 20px;
+      }
+      #absolute-div3  {
+        top: 0;
+        right: 0;
+      }
+      #absolute-div1  {
+        bottom: 0;
+        left: 0;
+        }
+
+      #relative-div  {
+        height: 600px;
+        position: relative;
+        background: lightgray;
+      }
+
+      input[type=button] {
+        color:#08233e;
+        font:2.4em Futura, ‘Century Gothic’, AppleGothic, sans-serif;
+        font-size:70%;
+        cursor:pointer;
+        bottom:0;
+        right:0;
+        margin: 5px;
+        position:absolute;
+      }
+</style>
+  <head/>
+  <body>
+
+    <div id="relative-div">
+        <div id="absolute-div1">
+          <div class = "center" style=" background:blue; font-style:italic">
+            <p> I am a paragraph</p>
+          </div>
+       </div>
+       <div id="absolute-div2">
+         <input type="button"  id="ClickMeButton" value="Click Me">
+      </div>
+      <div id="absolute-div3">absolute-div3 </div>
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script>
+      $( document ).ready(() => {
+        $("#ClickMeButton").click(() => {
+          $("#absolute-div1, #absolute-div3").fadeToggle(1000);
+        })
+      });
+
+    </script>
+  </body>
+</html>

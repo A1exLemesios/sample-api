@@ -4,7 +4,6 @@
   "description": "A minimal node api\\",
   "main": "server/app.js",
   "scripts": {
-    "start": "server/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -16,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/A1exLemesios/sample-api/issues"
   },
-  "homepage": "https://github.com/A1exLemesios/sample-api#readme"
+  "homepage": "https://github.com/A1exLemesios/sample-api#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
 }
