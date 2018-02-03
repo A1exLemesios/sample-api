@@ -5,9 +5,17 @@
     <style>
 
       input[type=button] {
-        display: block;
+        color: #FFFDFD;
+        background-color: #555;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+        cursor: pointer;
+        display: inline-block;
+        width:40%;
         margin-top: 5px;
         margin-left: 5%;
+        margin-bottom: 3%;
         padding: 5px;
       }
       #bckgrImg {
@@ -36,65 +44,150 @@
         text-align: center;
       }
 
+      .question-title {
+        text-align: center;
+        font-size: 30px;
+        margin:10px;
+        padding:10px;
+        color: grey;
+        text-shadow: 0 1px 0 #cccccc,
+        0 2px 0 #c9c9c9, 0 3px 0 #bbbbbb,
+         0 4px 0 #b9b9b9, 0 5px 0 #aaaaaa,
+         0 6px 1px rgba(0, 0, 0, 0.1),
+         0 0 5px rgba(0, 0, 0, 0.1),
+         0 1px 3px rgba(0, 0, 0, 0.3),
+         0 3px 5px rgba(0, 0, 0, 0.2),
+         0 5px 10px rgba(0, 0, 0, 0.25),
+         0 20px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .highlight {
+        background-color: yellow!important;
+      }
+
     </style>
 
   <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.js"></script>
 
   <head/>
-  <body id="bckgrImg" style="background-repeat:no-repeat" >
+  <body id="bckgrImg"  >
 
-    <div class="question-div">
+    <div class="question-div" >
 
     </div>
-
     <script>
-    $(() => {
-      const index = 0;
-      $.get("http://proto.io/en/jobs/candidate-questions/quiz.json", (data, status) => {
-        let getQuestion = (index) => {
-          let currElement = data.questions[index];
-          $('<p>', {
-            class: 'questionTitle',
-            text: currElement.title,
-            id: currElement.q_id
-          }).appendTo(".question-div");
+$(() => {
 
-          if (currElement.question_type === "truefalse") {
-            $('<input/>').attr({
-              type: 'button',
-              name:'btn1',
-              value:"True"
-            }).appendTo('.question-div');
+  $.get("http://proto.io/en/jobs/candidate-questions/quiz.json", (data, status) => {
+//come until here if wrong ctrl + z
 
-            $('<input/>').attr({
-              type: 'button',
-              name:'btn2',
-              value:"False"
-            }).appendTo('.question-div');
-          } else {
-              currElement.possible_answers.forEach(createButtons);
-            }
-            $(document.body).css({'background-image': 'url(' + currElement.img + ')'});
-            index ++;
-          }
-        getQuestion(0)
-      });
-      $('.question-div').on('click', '.button', () => {
-        //validate answers
-        //setTimeout
-        //getNextQuestion
-        alert("hi theres")
-      });
-      let createButtons = (element, index) => {
-        $('<input/>').attr({
-          type: 'button',
-          class: 'button',
-          name: 'btn',
-          id: 'a_id:' + (index +1),
-          value: element.caption
-        }).appendTo('.question-div');
+    let poss_ans_index = 1;
+    let question_id = 0;
+    let score = 0;
+
+    let get_question = (question_id) => {
+      let curr_element = data.questions[question_id];
+      $("<p>", {
+        class: "question-title",
+        text: curr_element.title,
+        id: curr_element.q_id
+      }).appendTo(".question-div");
+
+      if (curr_element.question_type === "truefalse") {
+        createButtons(curr_element);
+      } else {
+        createButtons(curr_element, poss_ans_index);
+        }
+        $(".question-div").css({"background-image": "url(" + curr_element.img + ")"});
       }
-    });
+
+    let createButtons = (curr_element) => {
+      if (curr_element.question_type === "truefalse") {
+        let possible_answers = ["true", "false"]
+        possible_answers.forEach((ans) => {
+          $("<input/>").attr({
+            type: "button",
+            class: "button",
+            id: poss_ans_index,
+            value: ans
+          }).appendTo(".question-div");
+          console.log(poss_ans_index)
+          poss_ans_index++;
+       })
+     } else if (curr_element.question_type === "mutiplechoice-single" || curr_element.question_type
+       === "mutiplechoice-multiple") {
+        curr_element.possible_answers.forEach((ans) => {
+          $("<input/>").attr({
+            type: "button",
+            class: "button",
+            name: "btn",
+            id: poss_ans_index,
+            value: ans.caption
+          }).appendTo(".question-div");
+          console.log(poss_ans_index)
+          poss_ans_index++;
+        })
+      }
+    }
+// Event handlers
+
+    $(".question-div").on("click", ".button", (e) => {
+      let get_next_question = () => {
+        $(e.target).parent().empty();
+        question_id++;
+        get_question(question_id);
+      }
+
+      let ans_id = (e.target.id);
+      let qs_id = $(e.target).siblings(".question-title" ).attr("id");
+      let data_validation_obj = data.questions.find((q) => q.q_id === parseInt(qs_id))
+
+      if (data_validation_obj.q_id === (parseInt(qs_id))) {
+        if (data_validation_obj.question_type === "truefalse") {
+          let boolean = (JSON.parse(e.target.value));
+          if (data_validation_obj.correct_answer === boolean) {
+            get_next_question();
+          }else {
+            let corr_ans = (data_validation_obj.correct_answer).toString();
+              $( "input[value=" + corr_ans + "]" ).addClass("highlight")
+              $(".question-div :input").prop("disabled", true);
+              setTimeout( get_next_question, 3000);
+          }
+        }else if (data_validation_obj.question_type === "mutiplechoice-multiple")  {
+          if (data_validation_obj.correct_answer.includes(parseInt(ans_id))) {
+            let index = data_validation_obj.correct_answer.indexOf(parseInt(ans_id));
+            if (index > -1) {
+              data_validation_obj.correct_answer.splice(index, 1);
+            }
+            if (data_validation_obj.correct_answer.length === 0) {
+              score += data_validation_obj.points;
+              get_next_question();
+            }
+          } else if (!data_validation_obj.correct_answer.includes(parseInt(ans_id))) {
+            let corr_ans = [];
+            data_validation_obj.correct_answer.forEach((cr_ans) => corr_ans.push(cr_ans));
+            corr_ans.forEach((a) => {
+              $( "input[id=" + a + "]" ).addClass("highlight")
+            })
+              $(".question-div :input").prop("disabled", true);
+              setTimeout(get_next_question, 3000);
+          }
+        }else {
+          if(parseInt(ans_id) === data_validation_obj.correct_answer) {
+            score += data_validation_obj.points;
+            get_next_question();
+          } else {
+              let corr_ans = (data_validation_obj.correct_answer).toString();
+              $(".question-div :input").prop("disabled", true);
+              $( "input[id=" + corr_ans + "]" ).addClass("highlight")
+              setTimeout(get_next_question, 3000);
+            }
+          }
+        }
+      })
+      get_question(question_id);
+    })
+  })
     </script>
   </body>
 </html>
