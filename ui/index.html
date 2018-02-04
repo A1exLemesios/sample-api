@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html style="min-width: 100%; min-height:100%;">
   <head>
     <title> My questions </title>
     <style>
 
       input[type=button] {
+        text-transform: uppercase;
+        font-weight: bold;
+        font-family: monospace;
         color: #FFFDFD;
         background-color: #555;
-        -webkit-border-radius: 3px;
-        -moz-border-radius: 3px;
-        border-radius: 3px;
         cursor: pointer;
         display: inline-block;
         width:40%;
@@ -18,21 +18,33 @@
         margin-bottom: 3%;
         padding: 5px;
       }
-      #bckgrImg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        min-width: 100%;
-        min-height: 100%;
+
+      .question-div, input[type=button] {
+        border-style: groove;
+        border-color: white;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
       }
 
       .question-div {
-        width:800px;
-        height: 600px;
+        top:70px;
+        width:900px;
+        height: 500px;
         background-color: lightgray;
         margin:0 auto;
         position:relative;
+        display:block;
         z-index: 99999;
+      }
+
+      .welcome-button {
+          position:absolute;
+          right:0px;
+          bottom:0px;
+          width:40%;
+          font-size: 30px;
+          margin-right: 5%;
       }
 
       .question {
@@ -45,11 +57,13 @@
       }
 
       .question-title {
+        text-transform: uppercase;
+        font-family: monospace;
         text-align: center;
         font-size: 30px;
         margin:10px;
         padding:10px;
-        color: grey;
+        color: #ffffff;
         text-shadow: 0 1px 0 #cccccc,
         0 2px 0 #c9c9c9, 0 3px 0 #bbbbbb,
          0 4px 0 #b9b9b9, 0 5px 0 #aaaaaa,
@@ -61,8 +75,12 @@
          0 20px 20px rgba(0, 0, 0, 0.15);
       }
 
-      .highlight {
-        background-color: yellow!important;
+      .highlight-wrong {
+        background-color: #ff0000!important;
+      }
+
+      .highlight-correct {
+        background-color: #15ff00!important;
       }
 
     </style>
@@ -70,7 +88,7 @@
   <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.js"></script>
 
   <head/>
-  <body id="bckgrImg"  >
+  <body style = "background: -webkit-linear-gradient(#888, #010202);  background: linear-gradient(#888, #010202);"  >
 
     <div class="question-div" >
 
@@ -79,115 +97,190 @@
 $(() => {
 
   $.get("http://proto.io/en/jobs/candidate-questions/quiz.json", (data, status) => {
-//come until here if wrong ctrl + z
 
     let poss_ans_index = 1;
-    let question_id = 0;
+    let question_index = 0;
     let score = 0;
+    const last_question_index = data.questions.length - 1;
 
-    let get_question = (question_id) => {
-      let curr_element = data.questions[question_id];
-      $("<p>", {
-        class: "question-title",
-        text: curr_element.title,
-        id: curr_element.q_id
-      }).appendTo(".question-div");
-
-      if (curr_element.question_type === "truefalse") {
-        createButtons(curr_element);
-      } else {
-        createButtons(curr_element, poss_ans_index);
-        }
-        $(".question-div").css({"background-image": "url(" + curr_element.img + ")"});
-      }
-
-    let createButtons = (curr_element) => {
-      if (curr_element.question_type === "truefalse") {
-        let possible_answers = ["true", "false"]
-        possible_answers.forEach((ans) => {
-          $("<input/>").attr({
-            type: "button",
-            class: "button",
-            id: poss_ans_index,
-            value: ans
+    let create_paragraphs = (curr_element, par_type) => {
+      if (par_type === "quiz_greeting") {
+        curr_element.forEach((el) => {
+          $("<p>", {
+            class: "question-title",
+            text: el,
+            id: "quiz_greeting"
           }).appendTo(".question-div");
-          console.log(poss_ans_index)
-          poss_ans_index++;
-       })
-     } else if (curr_element.question_type === "mutiplechoice-single" || curr_element.question_type
-       === "mutiplechoice-multiple") {
-        curr_element.possible_answers.forEach((ans) => {
-          $("<input/>").attr({
-            type: "button",
-            class: "button",
-            name: "btn",
-            id: poss_ans_index,
-            value: ans.caption
-          }).appendTo(".question-div");
-          console.log(poss_ans_index)
-          poss_ans_index++;
         })
+      }else if (par_type === "question_par") {
+        $("<p>", {
+          class: "question-title",
+          text: curr_element.title,
+          id: curr_element.q_id
+        }).appendTo(".question-div");
+      }else if (par_type === "end_par") {
+        $("<p>", {
+          class: "question-title",
+          text: `${curr_element.title}, ${curr_element.message} Score: ${curr_element.score}`,
+          id: curr_element.r_id
+        }).appendTo(".question-div");
+      }else {
+        console.error("No such paragraph Type found");
+        throw new Error ("Paragraph_type_unknown");
       }
     }
-// Event handlers
 
+    let get_question = (question_index) => {
+      let curr_element = data.questions[question_index];
+      $(".question-div").css({"background-image": "url(" + curr_element.img + ")"});
+      create_paragraphs(curr_element, "question_par")
+      if (curr_element.question_type === "truefalse") {
+        create_buttons(curr_element);
+      } else {
+        create_buttons(curr_element);
+      }
+    }
+
+      let create_buttons = (curr_element) => {
+        if (curr_element.question_type === "truefalse") {
+          let possible_answers = ["true", "false"]
+          possible_answers.forEach((ans) => {
+            $("<input/>").attr({
+              type: "button",
+              class: "button",
+              id: poss_ans_index,
+              value: ans
+            }).appendTo(".question-div");
+            poss_ans_index++;
+         })
+       } else if (curr_element.question_type === "mutiplechoice-single" || curr_element.question_type
+         === "mutiplechoice-multiple") {
+          curr_element.possible_answers.forEach((ans) => {
+            $("<input/>").attr({
+              type: "button",
+              class: "button",
+              name: "btn",
+              id: poss_ans_index,
+              value: ans.caption
+            }).appendTo(".question-div");
+            poss_ans_index++;
+          })
+        } else if (curr_element === "welcome-button") {
+          $("<input/>").attr({
+            type: "button",
+            class: "welcome-button",
+            name: "welcome-button",
+            id: "quiz_greeting",
+            value: "Go to questions"
+          }).addClass("welcome-button").appendTo(".question-div");
+        }
+      }
+
+    let quiz_greeting = () => {
+      let curr_element = [data.title, data.description]
+      create_paragraphs(curr_element, "quiz_greeting");
+      $(".question-div").css({"background-image": "url(" + data.questions[0].img + ")"});
+      create_buttons("welcome-button")
+    }
+
+
+    $(".question-div").on("click", ".welcome-button", (e) => {
+      $(".welcome-button").prop("disabled", true);
+          $(e.target).parent().empty();
+          get_question(question_index);
+    })
+
+quiz_greeting();
+// Event handlers
     $(".question-div").on("click", ".button", (e) => {
       let get_next_question = () => {
         $(e.target).parent().empty();
-        question_id++;
-        get_question(question_id);
+        if (last_question_index === question_index) {
+            $.get("https://proto.io/en/jobs/candidate-questions/result.json", (data, status) => {
+              const score_percentage = score * 5;
+              let curr_element = [];
+              console.log()
+              if (score_percentage > 0 && score_percentage <= 33) {
+                curr_element = data.results[0];
+              } else if (score_percentage > 33 && score_percentage <= 66){
+                curr_element = data.results[1];
+
+              }else {
+                curr_element = data.results[2]
+              }
+              curr_element.score = score_percentage;
+              create_paragraphs(curr_element, "end_par");
+            });
+        }
+        question_index++;
+        get_question(question_index);
       }
 
       let ans_id = (e.target.id);
       let qs_id = $(e.target).siblings(".question-title" ).attr("id");
+
+
       let data_validation_obj = data.questions.find((q) => q.q_id === parseInt(qs_id))
+      if (!data_validation_obj) {
+        throw new Error (`'${qs_id} ' : qs_id not found`)
+      }
 
       if (data_validation_obj.q_id === (parseInt(qs_id))) {
-        if (data_validation_obj.question_type === "truefalse") {
-          let boolean = (JSON.parse(e.target.value));
-          if (data_validation_obj.correct_answer === boolean) {
-            get_next_question();
-          }else {
-            let corr_ans = (data_validation_obj.correct_answer).toString();
-              $( "input[value=" + corr_ans + "]" ).addClass("highlight")
-              $(".question-div :input").prop("disabled", true);
-              setTimeout( get_next_question, 3000);
-          }
-        }else if (data_validation_obj.question_type === "mutiplechoice-multiple")  {
-          if (data_validation_obj.correct_answer.includes(parseInt(ans_id))) {
-            let index = data_validation_obj.correct_answer.indexOf(parseInt(ans_id));
-            if (index > -1) {
-              data_validation_obj.correct_answer.splice(index, 1);
-            }
-            if (data_validation_obj.correct_answer.length === 0) {
+        switch(data_validation_obj.question_type) {
+          case "truefalse":
+            let boolean = (JSON.parse(e.target.value));
+            if (data_validation_obj.correct_answer === boolean) {
+              $( "input[value=" + data_validation_obj.correct_answer.toString()  + "]" )
+                .addClass("highlight-correct").fadeOut(3000)
+              $(".question-div :input").prop("disabled", true).fadeOut(3000);
               score += data_validation_obj.points;
-              get_next_question();
-            }
-          } else if (!data_validation_obj.correct_answer.includes(parseInt(ans_id))) {
-            let corr_ans = [];
-            data_validation_obj.correct_answer.forEach((cr_ans) => corr_ans.push(cr_ans));
-            corr_ans.forEach((a) => {
-              $( "input[id=" + a + "]" ).addClass("highlight")
-            })
-              $(".question-div :input").prop("disabled", true);
-              setTimeout(get_next_question, 3000);
-          }
-        }else {
-          if(parseInt(ans_id) === data_validation_obj.correct_answer) {
-            score += data_validation_obj.points;
-            get_next_question();
-          } else {
+              setTimeout( get_next_question, 3000);
+            }else {
               let corr_ans = (data_validation_obj.correct_answer).toString();
-              $(".question-div :input").prop("disabled", true);
-              $( "input[id=" + corr_ans + "]" ).addClass("highlight")
+              $( "input[value=" + corr_ans + "]" ).addClass("highlight-wrong")
+              $(".question-div :input").prop("disabled", true).fadeOut(3000);
+              setTimeout( get_next_question, 3000);
+            }
+          break;
+          case "mutiplechoice-multiple":
+            if (data_validation_obj.correct_answer.includes(parseInt(ans_id))) {
+              let index = data_validation_obj.correct_answer.indexOf(parseInt(ans_id));
+            $( "input[id=" + ans_id + "]" ).addClass("highlight-correct")
+              data_validation_obj.correct_answer.splice(index, 1);
+            if (data_validation_obj.correct_answer.length === 0) {
+              $(".question-div :input").prop("disabled", true).fadeOut(3000);
+              score += data_validation_obj.points;
               setTimeout(get_next_question, 3000);
             }
-          }
+            }else if (!data_validation_obj.correct_answer.includes(parseInt(ans_id))) {
+              data_validation_obj.correct_answer.forEach((cr_ans) => {
+                $( "input[id=" + cr_ans + "]" ).addClass("highlight-wrong")
+              });
+              $(".question-div :input").prop("disabled", true).fadeOut(3000);
+              setTimeout(get_next_question, 3000);
+            }
+          break;
+          case  "mutiplechoice-single":
+            let corr_ans = data_validation_obj.correct_answer;
+            if(parseInt(ans_id) === corr_ans) {
+              $(".question-div :input").prop("disabled", true).fadeOut(3000);
+              $( "input[id=" + corr_ans + "]" ).addClass("highlight-correct")
+              score += data_validation_obj.points;
+              setTimeout(get_next_question, 3000);
+            } else {
+                $(".question-div :input").prop("disabled", true).fadeOut(3000);
+                $( "input[id=" + corr_ans + "]" ).addClass("highlight-wrong")
+                setTimeout(get_next_question, 3000);
+              }
+          break;
+          default:
+            console.error("No such question Type found");
+            throw new Error ("Question_type_unknown");
         }
-      })
-      get_question(question_id);
+      }
     })
   })
+})
     </script>
   </body>
 </html>
