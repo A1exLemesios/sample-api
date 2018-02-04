@@ -6,5 +6,8 @@ How to start this thing :
  - Then navigate in the project folder `$cd ../../sample-api`
  - Execute `$npm install` and `node server/app.js` commands
  - Open a CHROME browser and type in `http://localhost:8080`
+ 
+ ***OR***
+ - Just download the zip folder , unzip it and open ui/index.html with CHROME
  - Enjoy playing :)
  
