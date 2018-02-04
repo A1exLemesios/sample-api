@@ -87,13 +87,19 @@
     <script>
 $(() => {
 
+
   $.get("http://proto.io/en/jobs/candidate-questions/quiz.json", (data, status) => {
+// Check for refresh event
+    window.onbeforeunload = (e) => {
+      return "ss" ;
+    };
 
     let poss_ans_index = 1;
     let question_index = 0;
     let score = 0;
     const last_question_index = data.questions.length - 1;
 
+// Functions
     let create_paragraphs = (curr_element, par_type) => {
       if (par_type === "quiz_greeting") {
         curr_element.forEach((el) => {
@@ -174,49 +180,52 @@ $(() => {
       create_buttons("welcome-button")
     }
 
-
+// Event handlers
     $(".question-div").on("click", ".welcome-button", (e) => {
       $(".welcome-button").prop("disabled", true);
           $(e.target).parent().empty();
           get_question(question_index);
     })
 
-quiz_greeting();
-// Event handlers
     $(".question-div").on("click", ".button", (e) => {
+      let isLastQuestion = () => {
+        $.get("https://proto.io/en/jobs/candidate-questions/result.json", (data, status) => {
+          const score_percentage = score * 5;
+          let curr_element = [];
+          if (score_percentage > 0 && score_percentage <= 33) {
+            curr_element = data.results[0];
+          } else if (score_percentage > 33 && score_percentage <= 66){
+            curr_element = data.results[1];
+
+          }else {
+            curr_element = data.results[2]
+          }
+          curr_element.score = score_percentage;
+          create_paragraphs(curr_element, "end_par");
+        });
+
+        return;
+      }
+
       let get_next_question = () => {
         $(e.target).parent().empty();
         if (last_question_index === question_index) {
-            $.get("https://proto.io/en/jobs/candidate-questions/result.json", (data, status) => {
-              const score_percentage = score * 5;
-              let curr_element = [];
-              if (score_percentage > 0 && score_percentage <= 33) {
-                curr_element = data.results[0];
-              } else if (score_percentage > 33 && score_percentage <= 66){
-                curr_element = data.results[1];
-
-              }else {
-                curr_element = data.results[2]
-              }
-              curr_element.score = score_percentage;
-              create_paragraphs(curr_element, "end_par");
-            });
-
-            return;
+          isLastQuestion();
         }
-        question_index++;
-        get_question(question_index);
+        else {
+          question_index++;
+          get_question(question_index);
+        }
       }
 
       let ans_id = (e.target.id);
       let qs_id = $(e.target).siblings(".question-title" ).attr("id");
 
-
       let data_validation_obj = data.questions.find((q) => q.q_id === parseInt(qs_id))
       if (!data_validation_obj) {
         throw new Error (`'${qs_id} ' : qs_id not found`)
       }
-
+// Quiz logic
       if (data_validation_obj.q_id === (parseInt(qs_id))) {
         switch(data_validation_obj.question_type) {
           case "truefalse":
@@ -271,6 +280,7 @@ quiz_greeting();
         }
       }
     })
+  quiz_greeting();
   })
 })
     </script>
