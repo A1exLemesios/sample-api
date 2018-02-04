@@ -47,15 +47,6 @@
           margin-right: 5%;
       }
 
-      .question {
-        text align:center;
-        font-size: 16px;
-        border: 1px solid red;
-        margin:3%;
-        padding: 3%;
-        text-align: center;
-      }
-
       .question-title {
         text-transform: uppercase;
         font-family: monospace;
@@ -199,7 +190,6 @@ quiz_greeting();
             $.get("https://proto.io/en/jobs/candidate-questions/result.json", (data, status) => {
               const score_percentage = score * 5;
               let curr_element = [];
-              console.log()
               if (score_percentage > 0 && score_percentage <= 33) {
                 curr_element = data.results[0];
               } else if (score_percentage > 33 && score_percentage <= 66){
@@ -211,6 +201,8 @@ quiz_greeting();
               curr_element.score = score_percentage;
               create_paragraphs(curr_element, "end_par");
             });
+
+            return;
         }
         question_index++;
         get_question(question_index);
@@ -231,15 +223,15 @@ quiz_greeting();
             let boolean = (JSON.parse(e.target.value));
             if (data_validation_obj.correct_answer === boolean) {
               $( "input[value=" + data_validation_obj.correct_answer.toString()  + "]" )
-                .addClass("highlight-correct").fadeOut(3000)
-              $(".question-div :input").prop("disabled", true).fadeOut(3000);
+                .addClass("highlight-correct")
+              $(".question-div :input").prop("disabled", true).fadeOut(3500);
               score += data_validation_obj.points;
-              setTimeout( get_next_question, 3000);
+              setTimeout( get_next_question, 3200);
             }else {
               let corr_ans = (data_validation_obj.correct_answer).toString();
               $( "input[value=" + corr_ans + "]" ).addClass("highlight-wrong")
-              $(".question-div :input").prop("disabled", true).fadeOut(3000);
-              setTimeout( get_next_question, 3000);
+              $(".question-div :input").prop("disabled", true).fadeOut(3500);
+              setTimeout( get_next_question, 3200);
             }
           break;
           case "mutiplechoice-multiple":
@@ -248,29 +240,29 @@ quiz_greeting();
             $( "input[id=" + ans_id + "]" ).addClass("highlight-correct")
               data_validation_obj.correct_answer.splice(index, 1);
             if (data_validation_obj.correct_answer.length === 0) {
-              $(".question-div :input").prop("disabled", true).fadeOut(3000);
+              $(".question-div :input").prop("disabled", true).fadeOut(3500);
               score += data_validation_obj.points;
-              setTimeout(get_next_question, 3000);
+              setTimeout(get_next_question, 3200);
             }
             }else if (!data_validation_obj.correct_answer.includes(parseInt(ans_id))) {
               data_validation_obj.correct_answer.forEach((cr_ans) => {
                 $( "input[id=" + cr_ans + "]" ).addClass("highlight-wrong")
               });
-              $(".question-div :input").prop("disabled", true).fadeOut(3000);
-              setTimeout(get_next_question, 3000);
+              $(".question-div :input").prop("disabled", true).fadeOut(3500);
+              setTimeout(get_next_question, 3200);
             }
           break;
           case  "mutiplechoice-single":
             let corr_ans = data_validation_obj.correct_answer;
             if(parseInt(ans_id) === corr_ans) {
-              $(".question-div :input").prop("disabled", true).fadeOut(3000);
+              $(".question-div :input").prop("disabled", true).fadeOut(3500);
               $( "input[id=" + corr_ans + "]" ).addClass("highlight-correct")
               score += data_validation_obj.points;
-              setTimeout(get_next_question, 3000);
+              setTimeout(get_next_question, 3200);
             } else {
-                $(".question-div :input").prop("disabled", true).fadeOut(3000);
+                $(".question-div :input").prop("disabled", true).fadeOut(3500);
                 $( "input[id=" + corr_ans + "]" ).addClass("highlight-wrong")
-                setTimeout(get_next_question, 3000);
+                setTimeout(get_next_question, 3200);
               }
           break;
           default:
